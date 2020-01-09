@@ -6622,7 +6622,7 @@
         "operationId": "userSign",
         "parameters": [
           {
-            "name": "options",
+            "name": "body",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/SignOption"
@@ -10778,23 +10778,6 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
-    "SignInForm": {
-      "description": "SignInForm form for signing in with user/password",
-      "type": "object",
-      "properties": {
-        "Password": {
-          "description": "TODO remove required from password for SecondFactorAuthentication",
-          "type": "string"
-        },
-        "Remember": {
-          "type": "boolean"
-        },
-        "UserName": {
-          "type": "string"
-        }
-      },
-      "x-go-package": "code.gitea.io/gitea/modules/auth"
-    },
     "StateType": {
       "description": "StateType issue state type",
       "type": "string",
@@ -11163,6 +11146,20 @@
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "signInForm": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "UserName"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/routers/api/v1/swagger"
     }
   },
   "responses": {
