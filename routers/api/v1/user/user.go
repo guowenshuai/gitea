@@ -109,7 +109,7 @@ func GetInfo(ctx *context.APIContext) {
 }
 
 func Sign(ctx *context.APIContext, form auth.SignInForm) {
-	// swagger:operation POST /user user userSign
+	// swagger:operation POST /user/login user userSign
 	// ---
 	// summary: Sign user
 	// produces:
