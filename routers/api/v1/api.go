@@ -546,8 +546,8 @@ func RegisterRoutes(m *macaron.Macaron) {
 		}, reqToken())
 
 		m.Group("/user", func() {
-			m.Post("/login", bind(auth.SignInForm{}, user.Sign))
 			m.Get("", user.GetAuthenticatedUser)
+			m.Combo("/login").Post(bind(auth.SignInForm{}, user.Sign))
 			m.Combo("/emails").Get(user.ListEmails).
 				Post(bind(api.CreateEmailOption{}), user.AddEmail).
 				Delete(bind(api.DeleteEmailOption{}), user.DeleteEmail)

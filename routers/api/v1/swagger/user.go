@@ -42,3 +42,8 @@ type swaggerResponseUserHeatmapData struct {
 	// in:body
 	Body []models.UserHeatmapData `json:"body"`
 }
+
+type signInForm struct {
+	UserName string `json:"username" binding:"Required;MaxSize(254)"`
+	Password string `json:"password" binding:"Required;MaxSize(255)"`
+}

@@ -1,7 +1,10 @@
 #Makefile related to docker
 
-DOCKER_IMAGE ?= gitea/gitea
-DOCKER_TAG ?= latest
+BRANCH := `git symbolic-ref --short -q HEAD`
+HASHCOMMIT := `git rev-parse --short HEAD`
+
+DOCKER_IMAGE ?= harbor.raginghot.com.cn/gitea/gitea
+DOCKER_TAG := $(BRANCH)-$(HASHCOMMIT)
 DOCKER_REF := $(DOCKER_IMAGE):$(DOCKER_TAG)
 
 .PHONY: docker
