@@ -106,7 +106,7 @@ type swaggerParameterBodies struct {
 	// in:body
 	MigrateRepoForm auth.MigrateRepoForm
 	// in:body
-	SignOption signInForm
+	SignOption signOption
 
 	// in:body
 	EditAttachmentOptions api.EditAttachmentOptions
