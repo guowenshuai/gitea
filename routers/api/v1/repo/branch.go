@@ -136,6 +136,7 @@ func CreateBranch(ctx *context.APIContext, form api.CreateBranchOption) {
 	//   required: true
 	// - name: body
 	//   in: body
+	//   required: true
 	//   schema:
 	//     "$ref": "#/definitions/CreateBranchOption"
 	// responses:
@@ -154,7 +155,7 @@ func CreateBranch(ctx *context.APIContext, form api.CreateBranchOption) {
 	}
 
 	// get branch
-	branch, err := ctx.Repo.Repository.GetBranch(ctx.Repo.BranchName)
+	branch, err := ctx.Repo.Repository.GetBranch(form.NewBranch)
 	if err != nil {
 		if git.IsErrBranchNotExist(err) {
 			ctx.NotFound(err)
