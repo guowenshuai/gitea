@@ -105,8 +105,6 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	MigrateRepoForm auth.MigrateRepoForm
-	// in:body
-	SignInForm auth.SignInForm
 
 	// in:body
 	EditAttachmentOptions api.EditAttachmentOptions
@@ -122,4 +120,11 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	RepoTopicOptions api.RepoTopicOptions
+
+
+	// in:body
+	SignInForm auth.SignInForm
+
+	// in:body
+	CreateBranchOption api.CreateBranchOption
 }

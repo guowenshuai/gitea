@@ -1451,6 +1451,46 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/branch": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Create NewBranch Base OldBranch",
+        "operationId": "repoCreateBranch",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateBranchOption"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Branch"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/branches": {
       "get": {
         "produces": [
@@ -8116,6 +8156,21 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "CreateBranchOption": {
+      "description": "CreateBranchOption options for creating a branch",
+      "type": "object",
+      "properties": {
+        "new_branch": {
+          "type": "string",
+          "x-go-name": "NewBranch"
+        },
+        "old_branch": {
+          "type": "string",
+          "x-go-name": "OldBranch"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "CreateEmailOption": {
       "description": "CreateEmailOption options when creating email addresses",
       "type": "object",
@@ -11717,7 +11772,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/RepoTopicOptions"
+        "$ref": "#/definitions/CreateBranchOption"
       }
     },
     "redirect": {
