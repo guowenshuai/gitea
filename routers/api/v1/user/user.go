@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"code.gitea.io/gitea/models"
+	"code.gitea.io/gitea/modules/auth"
 	"code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/convert"
 	api "code.gitea.io/gitea/modules/structs"
@@ -106,6 +107,29 @@ func GetInfo(ctx *context.APIContext) {
 
 	ctx.JSON(200, convert.ToUser(u, ctx.IsSigned, ctx.User != nil && (ctx.User.ID == u.ID || ctx.User.IsAdmin)))
 }
+
+func Sign(ctx *context.APIContext, form auth.SignInForm) {
+	// swagger:operation POST /user user userSign
+	// ---
+	// summary: Sign user
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: options
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/SignOption"
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/User"
+	u, err := models.UserSignIn(form.UserName, form.Password)
+	if err != nil {
+		ctx.Error(http.StatusUnauthorized, "sign", err)
+		return
+	}
+	ctx.JSON(http.StatusOK, u)
+}
+
 
 // GetAuthenticatedUser get current user's information
 func GetAuthenticatedUser(ctx *context.APIContext) {

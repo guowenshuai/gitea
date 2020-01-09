@@ -6610,6 +6610,30 @@
             "$ref": "#/responses/User"
           }
         }
+      },
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Sign user",
+        "operationId": "userSign",
+        "parameters": [
+          {
+            "name": "options",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SignOption"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/User"
+          }
+        }
       }
     },
     "/user/emails": {
@@ -10753,6 +10777,23 @@
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "SignInForm": {
+      "description": "SignInForm form for signing in with user/password",
+      "type": "object",
+      "properties": {
+        "Password": {
+          "description": "TODO remove required from password for SecondFactorAuthentication",
+          "type": "string"
+        },
+        "Remember": {
+          "type": "boolean"
+        },
+        "UserName": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/auth"
     },
     "StateType": {
       "description": "StateType issue state type",
