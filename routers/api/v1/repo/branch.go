@@ -6,6 +6,8 @@
 package repo
 
 import (
+	"net/http"
+
 	"code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/routers/api/v1/convert"
@@ -103,4 +105,61 @@ func ListBranches(ctx *context.APIContext) {
 	}
 
 	ctx.JSON(200, &apiBranches)
+}
+
+
+func CreateBranch(ctx *context.APIContext, form api.CreateBranchOption) {
+	// swagger:operation POST /repos/{owner}/{repo}/branch repository repoCreateBranch
+	// ---
+	// summary: Create NewBranch Base OldBranch
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the repo
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo
+	//   type: string
+	//   required: true
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/CreateBranchOption"
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/Branch"
+
+	if !ctx.Repo.CanCreateBranch() {
+		ctx.NotFound("CreateBranch", nil)
+		return
+	}
+
+	err := ctx.Repo.Repository.CreateNewBranch(ctx.User, form.OldBranch, form.NewBranch)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "CreateNewBranch", err)
+		return
+	}
+
+	// get branch
+	branch, err := ctx.Repo.Repository.GetBranch(form.NewBranch)
+	if err != nil {
+		if git.IsErrBranchNotExist(err) {
+			ctx.NotFound(err)
+		} else {
+			ctx.Error(500, "GetBranch", err)
+		}
+		return
+	}
+
+	c, err := branch.GetCommit()
+	if err != nil {
+		ctx.Error(500, "GetCommit", err)
+		return
+	}
+
+	ctx.JSON(200, convert.ToBranch(ctx.Repo.Repository, branch, c))
 }

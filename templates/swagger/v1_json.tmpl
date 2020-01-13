@@ -1312,6 +1312,46 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/branch": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Create NewBranch Base OldBranch",
+        "operationId": "repoCreateBranch",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateBranchOption"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Branch"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/branches": {
       "get": {
         "produces": [
@@ -6124,6 +6164,32 @@
         }
       }
     },
+    "/user/login": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Sign user",
+        "operationId": "userSign",
+        "parameters": [
+          {
+            "name": "options",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SignInForm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/User"
+          }
+        }
+      }
+    },
     "/user/orgs": {
       "get": {
         "produces": [
@@ -7158,6 +7224,21 @@
         "url": {
           "type": "string",
           "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "CreateBranchOption": {
+      "description": "CreateBranchOption options for creating a branch",
+      "type": "object",
+      "properties": {
+        "new_branch": {
+          "type": "string",
+          "x-go-name": "NewBranch"
+        },
+        "old_branch": {
+          "type": "string",
+          "x-go-name": "OldBranch"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -9600,6 +9681,23 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "SignInForm": {
+      "description": "SignInForm form for signing in with user/password",
+      "type": "object",
+      "properties": {
+        "Password": {
+          "description": "TODO remove required from password for SecondFactorAuthentication",
+          "type": "string"
+        },
+        "Remember": {
+          "type": "boolean"
+        },
+        "UserName": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/auth"
+    },
     "StateType": {
       "description": "StateType issue state type",
       "type": "string",
@@ -10390,7 +10488,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/DeleteFileOptions"
+        "$ref": "#/definitions/CreateBranchOption"
       }
     },
     "redirect": {

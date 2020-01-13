@@ -120,4 +120,7 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	SignInForm auth.SignInForm
+
+	// in:body
+	CreateBranchOption api.CreateBranchOption
 }

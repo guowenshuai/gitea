@@ -5,6 +5,7 @@
 package repo
 
 import (
+	"net/http"
 	"time"
 
 	"code.gitea.io/gitea/models"
@@ -175,7 +176,7 @@ func EditMilestone(ctx *context.APIContext, form api.EditMilestoneOption) {
 		if models.IsErrMilestoneNotExist(err) {
 			ctx.NotFound()
 		} else {
-			ctx.Error(500, "GetMilestoneByRepoID", err)
+			ctx.Error(500, "EditMilestone", err)
 		}
 		return
 	}
@@ -190,8 +191,19 @@ func EditMilestone(ctx *context.APIContext, form api.EditMilestoneOption) {
 		milestone.DeadlineUnix = util.TimeStamp(form.Deadline.Unix())
 	}
 
+	if form.State != nil {
+		closed := false
+		if *form.State == string(api.StateOpen) {
+			closed = false
+		} else if *form.State == string(api.StateClosed) {
+			closed = true
+		}
+		if err := models.ChangeMilestoneStatus(milestone, closed); err != nil {
+			ctx.Error(http.StatusBadRequest, "EditMilestone", err)
+		}
+	}
 	if err := models.UpdateMilestone(milestone); err != nil {
-		ctx.ServerError("UpdateMilestone", err)
+		ctx.ServerError("EditMilestone", err)
 		return
 	}
 	ctx.JSON(200, milestone.APIFormat())

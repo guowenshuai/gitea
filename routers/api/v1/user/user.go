@@ -88,7 +88,7 @@ func Sign(ctx *context.APIContext, form auth.SignInForm) {
 	// - name: options
 	//   in: body
 	//   schema:
-	//     "$ref": "#/definitions/SignOption"
+	//     "$ref": "#/definitions/SignInForm"
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/User"
