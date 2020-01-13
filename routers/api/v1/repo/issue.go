@@ -15,7 +15,6 @@ import (
 	"code.gitea.io/gitea/modules/context"
 	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
 	"code.gitea.io/gitea/modules/notification"
-	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 
 	api "code.gitea.io/gitea/modules/structs"
@@ -51,6 +50,10 @@ func ListIssues(ctx *context.APIContext) {
 	//   in: query
 	//   description: page number of requested issues
 	//   type: integer
+	// - name: pageSize
+	//   in: query
+	//   description: pageSize of requested issues
+	//   type: integer
 	// - name: q
 	//   in: query
 	//   description: search string
@@ -59,13 +62,17 @@ func ListIssues(ctx *context.APIContext) {
 	//   "200":
 	//     "$ref": "#/responses/IssueList"
 	var isClosed util.OptionalBool
+	var issuesTotal int
 	switch ctx.Query("state") {
 	case "closed":
 		isClosed = util.OptionalBoolTrue
+		issuesTotal = ctx.Repo.Repository.NumClosedIssues
 	case "all":
 		isClosed = util.OptionalBoolNone
+		issuesTotal = ctx.Repo.Repository.NumIssues
 	default:
 		isClosed = util.OptionalBoolFalse
+		issuesTotal = ctx.Repo.Repository.NumOpenIssues
 	}
 
 	var issues []*models.Issue
@@ -91,11 +98,16 @@ func ListIssues(ctx *context.APIContext) {
 
 	// Only fetch the issues if we either don't have a keyword or the search returned issues
 	// This would otherwise return all issues if no issues were found by the search.
+	// pageSize := setting.UI.IssuePagingNum
+	pageSize := ctx.QueryInt("pageSize")
+	// if ctx.QueryInt("pageSize") > 0 {
+	// 	pageSize = ctx.QueryInt("pageSize")
+	// }
 	if len(keyword) == 0 || len(issueIDs) > 0 || len(labelIDs) > 0 {
 		issues, err = models.Issues(&models.IssuesOptions{
 			RepoIDs:  []int64{ctx.Repo.Repository.ID},
 			Page:     ctx.QueryInt("page"),
-			PageSize: setting.UI.IssuePagingNum,
+			PageSize: pageSize,
 			IsClosed: isClosed,
 			IssueIDs: issueIDs,
 			LabelIDs: labelIDs,
@@ -112,7 +124,7 @@ func ListIssues(ctx *context.APIContext) {
 		apiIssues[i] = issues[i].APIFormat()
 	}
 
-	ctx.SetLinkHeader(ctx.Repo.Repository.NumIssues, setting.UI.IssuePagingNum)
+	ctx.SetLinkHeader(issuesTotal, pageSize)
 	ctx.JSON(200, &apiIssues)
 }
 
