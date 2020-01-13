@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"code.gitea.io/gitea/models"
+	"code.gitea.io/gitea/modules/auth"
 	"code.gitea.io/gitea/modules/context"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/routers/api/v1/convert"
@@ -75,6 +76,30 @@ func Search(ctx *context.APIContext) {
 		"data": results,
 	})
 }
+
+
+func Sign(ctx *context.APIContext, form auth.SignInForm) {
+	// swagger:operation POST /user/login user userSign
+	// ---
+	// summary: Sign user
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: options
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/SignOption"
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/User"
+	u, err := models.UserSignIn(form.UserName, form.Password)
+	if err != nil {
+		ctx.Error(http.StatusUnauthorized, "login", err)
+		return
+	}
+	ctx.JSON(http.StatusOK, u)
+}
+
 
 // GetInfo get user's information
 func GetInfo(ctx *context.APIContext) {
