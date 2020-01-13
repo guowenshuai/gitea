@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"code.gitea.io/gitea/models"
@@ -20,6 +21,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 )
 
+var issuesLock sync.Mutex
 // ListIssues list the issues of a repository
 func ListIssues(ctx *context.APIContext) {
 	// swagger:operation GET /repos/{owner}/{repo}/issues issue issueListIssues
@@ -292,6 +294,8 @@ func EditIssue(ctx *context.APIContext, form api.EditIssueOption) {
 	// responses:
 	//   "201":
 	//     "$ref": "#/responses/Issue"
+	issuesLock.Lock()
+	defer issuesLock.Unlock()
 	issue, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
 		if models.IsErrIssueNotExist(err) {
