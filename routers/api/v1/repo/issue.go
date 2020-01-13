@@ -58,6 +58,10 @@ func ListIssues(ctx *context.APIContext) {
 	//   in: query
 	//   description: search string
 	//   type: string
+	// - name: withComments
+	//   in: query
+	//   description: if get all comments
+	//   type: boolean
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/IssueList"
@@ -124,8 +128,25 @@ func ListIssues(ctx *context.APIContext) {
 		apiIssues[i] = issues[i].APIFormat()
 	}
 
-	ctx.SetLinkHeader(issuesTotal, pageSize)
-	ctx.JSON(200, &apiIssues)
+	if ctx.QueryBool("withComments") {
+		customIssues := make([]*Issues, len(apiIssues))
+		for i := range apiIssues {
+			customIssues[i] = &Issues{
+				Issue: apiIssues[i],
+			}
+		}
+		ctx.SetLinkHeader(issuesTotal, pageSize)
+		ctx.JSON(200, &customIssues)
+
+	} else {
+		ctx.SetLinkHeader(issuesTotal, pageSize)
+		ctx.JSON(200, &apiIssues)
+	}
+}
+
+type Issues struct {
+	*api.Issue
+	Comments []*api.Comment `json:"comments"`
 }
 
 // GetIssue get an issue of a repository
