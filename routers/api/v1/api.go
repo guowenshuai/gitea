@@ -670,6 +670,12 @@ func RegisterRoutes(m *macaron.Macaron) {
 								Delete(repo.DeleteIssueCommentDeprecated)
 						})
 
+						m.Group("/dependency", func() {
+							m.Combo("").
+								Post(bind(api.CreateIssueDependencyOption{}), repo.AddDependency).
+								Delete(bind(api.RemoveIssueDependencyOption{}), repo.RemoveDependency)
+						})
+
 						m.Group("/labels", func() {
 							m.Combo("").Get(repo.ListIssueLabels).
 								Post(reqToken(), bind(api.IssueLabelsOption{}), repo.AddIssueLabels).

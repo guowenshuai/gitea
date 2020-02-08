@@ -123,4 +123,10 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	CreateBranchOption api.CreateBranchOption
+
+	// in:body
+	CreateIssueDependencyOption api.CreateIssueDependencyOption
+
+	// in:body
+	RemoveIssueDependencyOption api.RemoveIssueDependencyOption
 }

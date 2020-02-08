@@ -217,3 +217,5 @@ type swaggerFileDeleteResponse struct {
 	//in: body
 	Body api.FileDeleteResponse `json:"body"`
 }
+
+

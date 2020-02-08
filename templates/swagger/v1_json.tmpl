@@ -3308,6 +3308,106 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/issues/{index}/dependency": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "Add a Dependency to a issue",
+        "operationId": "issueAddDependency",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateIssueDependencyOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "remove a Dependency from a issue",
+        "operationId": "issueRemoveDependency",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/RemoveIssueDependencyOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/issues/{index}/labels": {
       "get": {
         "produces": [
@@ -7382,6 +7482,18 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "CreateIssueDependencyOption": {
+      "description": "CreateIssueDependencyOption options for create a dependency",
+      "type": "object",
+      "properties": {
+        "newDependency": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "NewDependency"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "CreateIssueOption": {
       "description": "CreateIssueOption options to create one issue",
       "type": "object",
@@ -8750,6 +8862,22 @@
           },
           "x-go-name": "Assignees"
         },
+        "blocked_by_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "BlockedByDependencies"
+        },
+        "blocking_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "BlockingDependencies"
+        },
         "body": {
           "type": "string",
           "x-go-name": "Body"
@@ -9486,6 +9614,28 @@
         "zipball_url": {
           "type": "string",
           "x-go-name": "ZipURL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "RemoveIssueDependencyOption": {
+      "description": "RemoveIssueDependencyOption options for remove a dependency",
+      "type": "object",
+      "required": [
+        "removeDependency",
+        "dependencyType"
+      ],
+      "properties": {
+        "dependencyType": {
+          "description": "removed type,  blockedBy or blocking",
+          "type": "string",
+          "x-go-name": "DependencyType"
+        },
+        "removeDependency": {
+          "description": "removed dependency issue id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RemoveDependency"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -10494,7 +10644,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/CreateBranchOption"
+        "$ref": "#/definitions/RemoveIssueDependencyOption"
       }
     },
     "redirect": {
