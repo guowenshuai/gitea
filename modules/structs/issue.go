@@ -55,6 +55,9 @@ type Issue struct {
 	Deadline *time.Time `json:"due_date"`
 
 	PullRequest *PullRequestMeta `json:"pull_request"`
+
+	BlockedByDependencies []int64 `json:"blocked_by_dependencies"`
+	BlockingDependencies  []int64 `json:"blocking_dependencies"`
 }
 
 // ListIssueOption list issue options

@@ -401,7 +401,21 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 	if issue.DeadlineUnix != 0 {
 		apiIssue.Deadline = issue.DeadlineUnix.AsTimePtr()
 	}
+	if iss, err := issue.BlockedByDependencies(); err != nil {
+		log.Error("apiFormat %+v", err)
+	} else {
+		for i := range iss {
+			apiIssue.BlockedByDependencies = append(apiIssue.BlockedByDependencies, iss[i].ID)
+		}
+	}
 
+	if iss, err := issue.BlockingDependencies(); err != nil {
+		log.Error("apiFormat %+v", err)
+	} else {
+		for i := range iss {
+			apiIssue.BlockingDependencies = append(apiIssue.BlockingDependencies, iss[i].ID)
+		}
+	}
 	return apiIssue
 }
 

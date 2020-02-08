@@ -166,6 +166,7 @@ func GetIssue(ctx *context.APIContext) {
 		}
 		return
 	}
+
 	ctx.JSON(200, issue.APIFormat())
 }
 
