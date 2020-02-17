@@ -678,8 +678,8 @@ func RegisterRoutes(m *macaron.Macaron) {
 
 						m.Group("/groupReaction", func() {
 							m.Combo("").
-								Post(bind(api.CreateIssueGroupReactionOption{}, repo.AddGroupReaction)).
-								Delete(bind(api.RemoveIssueGroupReactionOption{}, repo.RemoveGroupReaction),)
+								Post(bind(api.CreateIssueGroupReactionOption{}), repo.AddGroupReaction).
+								Delete(bind(api.RemoveIssueGroupReactionOption{}), repo.RemoveGroupReaction)
 						})
 
 						m.Group("/labels", func() {

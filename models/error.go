@@ -1595,7 +1595,7 @@ func IsErrCircularGroupReaction(err error) bool {
 }
 
 func (err ErrCircularGroupReaction) Error() string {
-	return fmt.Sprintf("issue group reaction does already exist [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
+	return fmt.Sprintf("issue group reaction Circular [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
 }
 
 //  __________            .__

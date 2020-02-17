@@ -58,9 +58,9 @@ func AddDependency(ctx *context.APIContext, form api.CreateIssueDependencyOption
 	}
 
 	// Dependency
-	dep, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, depID)
+	dep, err := models.GetIssueByID(depID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
 		return
 	}
 
@@ -157,9 +157,9 @@ func RemoveDependency(ctx *context.APIContext, form api.RemoveIssueDependencyOpt
 	}
 
 	// Dependency
-	dep, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, depID)
+	dep, err := models.GetIssueByID(depID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
 		return
 	}
 

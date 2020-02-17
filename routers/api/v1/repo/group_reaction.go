@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"code.gitea.io/gitea/models"
+	"code.gitea.io/gitea/modules/log"
 	api "code.gitea.io/gitea/modules/structs"
 
 	"code.gitea.io/gitea/modules/context"
@@ -51,11 +52,12 @@ func AddGroupReaction(ctx *context.APIContext, form api.CreateIssueGroupReaction
 		ctx.Error(http.StatusNotFound, "GetIssueByIndex", err)
 		return
 	}
+	log.Info("AddGroupReaction: issueIndex %-v, childIndex %-v", issueIndex, childID)
 
 	// child issue
-	child, err :=  models.GetIssueByIndex(ctx.Repo.Repository.ID, childID)
+	child, err :=  models.GetIssueByID(childID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
 		return
 	}
 
@@ -132,9 +134,9 @@ func RemoveGroupReaction(ctx *context.APIContext, form api.RemoveIssueGroupReact
 	}
 
 	// child issue
-	child, err :=  models.GetIssueByIndex(ctx.Repo.Repository.ID, childID)
+	child, err :=  models.GetIssueByID(childID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
 		return
 	}
 
