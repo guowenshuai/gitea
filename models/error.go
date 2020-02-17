@@ -1544,6 +1544,60 @@ func (err ErrUnknownDependencyType) Error() string {
 	return fmt.Sprintf("unknown dependency type [type: %d]", err.Type)
 }
 
+//
+// custom error by raging
+//
+
+// group reaction
+
+// ErrGroupReactionExists already exist
+type ErrGroupReactionExists struct {
+	IssueID int64
+	ChildID int64
+}
+
+// IsErrGroupReactionExists checks if an error is a ErrDependencyExists.
+func IsErrGroupReactionExists(err error) bool {
+	_, ok := err.(ErrGroupReactionExists)
+	return ok
+}
+
+func (err ErrGroupReactionExists) Error() string {
+	return fmt.Sprintf("issue group reaction does already exist [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
+}
+
+// ErrGroupReactionNotExists represents a group reaction not exist kind of error.
+type ErrGroupReactionNotExists struct {
+	IssueID int64
+	ChildID int64
+}
+
+// IsErrGroupReactionNotExists checks if an error is a ErrGroupReactionNotExists.
+func IsErrGroupReactionNotExists(err error) bool {
+	_, ok := err.(ErrGroupReactionNotExists)
+	return ok
+}
+
+func (err ErrGroupReactionNotExists) Error() string {
+	return fmt.Sprintf("issue group reaction does not exist [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
+}
+
+// ErrCircularGroupReaction already exist
+type ErrCircularGroupReaction struct {
+	IssueID int64
+	ChildID int64
+}
+
+// IsErrCircularGroupReaction checks if an error is a ErrDependencyExists.
+func IsErrCircularGroupReaction(err error) bool {
+	_, ok := err.(ErrCircularGroupReaction)
+	return ok
+}
+
+func (err ErrCircularGroupReaction) Error() string {
+	return fmt.Sprintf("issue group reaction does already exist [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
+}
+
 //  __________            .__
 //  \______   \ _______  _|__| ______  _  __
 //  |       _// __ \  \/ /  |/ __ \ \/ \/ /

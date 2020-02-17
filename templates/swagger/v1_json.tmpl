@@ -3408,6 +3408,106 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/issues/{index}/groupReaction": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "Add a group reaction to a issue",
+        "operationId": "issueAddGroupReaction",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateIssueGroupReactionOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "remove a group reaction from a issue",
+        "operationId": "issueRemoveGroupReaction",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/RemoveIssueGroupReactionOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/issues/{index}/labels": {
       "get": {
         "produces": [
@@ -7494,6 +7594,18 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "CreateIssueGroupReactionOption": {
+      "description": "CreateIssueGroupReactionOption options for create a group reaction",
+      "type": "object",
+      "properties": {
+        "child": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Child"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "CreateIssueOption": {
       "description": "CreateIssueOption options to create one issue",
       "type": "object",
@@ -9640,6 +9752,22 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "RemoveIssueGroupReactionOption": {
+      "description": "RemoveIssueGroupReactionOption options for remove a group reaction",
+      "type": "object",
+      "required": [
+        "remove_child"
+      ],
+      "properties": {
+        "remove_child": {
+          "description": "removed group issue id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RemoveChild"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "RepoCommit": {
       "type": "object",
       "title": "RepoCommit contains information of a commit in the context of a repository.",
@@ -10644,7 +10772,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/RemoveIssueDependencyOption"
+        "$ref": "#/definitions/RemoveIssueGroupReactionOption"
       }
     },
     "redirect": {

@@ -58,7 +58,7 @@ func AddDependency(ctx *context.APIContext, form api.CreateIssueDependencyOption
 	}
 
 	// Dependency
-	dep, err := models.GetIssueByID(depID)
+	dep, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, depID)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
 		return
@@ -66,7 +66,7 @@ func AddDependency(ctx *context.APIContext, form api.CreateIssueDependencyOption
 
 	// Check if both issues are in the same repo
 	if issue.RepoID != dep.RepoID {
-		ctx.Error(http.StatusInternalServerError, "repo.issues.dependency.add_error_dep_not_same_repo", "add_error_dep_is_same_repo")
+		ctx.Error(http.StatusInternalServerError, "repo.issues.dependency.add_error_dep_not_same_repo", "add_error_dep_not_same_repo")
 		return
 	}
 
@@ -157,15 +157,15 @@ func RemoveDependency(ctx *context.APIContext, form api.RemoveIssueDependencyOpt
 	}
 
 	// Dependency
-	dep, err := models.GetIssueByID(depID)
+	dep, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, depID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
 		return
 	}
 
 	if err = models.RemoveIssueDependency(ctx.User, issue, dep, depType); err != nil {
 		if models.IsErrDependencyNotExists(err) {
-			ctx.Error(http.StatusBadRequest, "repo.issues.dependency.add_error_dep_not_exist", err)
+			ctx.Error(http.StatusBadRequest, "repo.issues.dependency.remove_error_dep_not_exist", err)
 			return
 		}
 		ctx.Error(http.StatusInternalServerError, "RemoveIssueDependency", err)

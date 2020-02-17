@@ -122,6 +122,7 @@ func init() {
 		new(DeletedBranch),
 		new(RepoIndexerStatus),
 		new(IssueDependency),
+		new(IssueGroupReaction),
 		new(LFSLock),
 		new(Reaction),
 		new(IssueAssignees),
