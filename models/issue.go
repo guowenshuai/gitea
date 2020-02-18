@@ -426,7 +426,7 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 		log.Error("apiFormat %+v", err)
 	} else {
 		for i := range iss {
-			apiIssue.BlockedByDependencies = append(apiIssue.BlockedByDependencies, iss[i].ID)
+			apiIssue.BlockedByDependencies = append(apiIssue.BlockedByDependencies, iss[i].Index)
 		}
 	}
 
@@ -434,7 +434,7 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 		log.Error("apiFormat %+v", err)
 	} else {
 		for i := range iss {
-			apiIssue.BlockingDependencies = append(apiIssue.BlockingDependencies, iss[i].ID)
+			apiIssue.BlockingDependencies = append(apiIssue.BlockingDependencies, iss[i].Index)
 		}
 	}
 
@@ -442,7 +442,7 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 		log.Error("apiFormat.GroupReactionChildren %+v", err)
 	} else {
 		for i := range iss {
-			apiIssue.GroupChildren = append(apiIssue.GroupChildren, iss[i].ID)
+			apiIssue.GroupChildren = append(apiIssue.GroupChildren, iss[i].Index)
 		}
 	}
 
@@ -450,7 +450,7 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 		log.Error("apiFormat.GroupReactionParents %+v", err)
 	} else {
 		for i := range iss {
-			apiIssue.GroupParents = append(apiIssue.GroupParents, iss[i].ID)
+			apiIssue.GroupParents = append(apiIssue.GroupParents, iss[i].Index)
 		}
 	}
 	return apiIssue

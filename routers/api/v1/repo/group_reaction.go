@@ -55,17 +55,17 @@ func AddGroupReaction(ctx *context.APIContext, form api.CreateIssueGroupReaction
 	log.Info("AddGroupReaction: issueIndex %-v, childIndex %-v", issueIndex, childID)
 
 	// child issue
-	child, err :=  models.GetIssueByID(childID)
+	child, err :=  models.GetIssueByIndex(ctx.Repo.Repository.ID, childID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
 		return
 	}
-
-	// check same repo
-	if issue.RepoID != child.RepoID {
-		ctx.Error(http.StatusBadRequest, "repo.issue.groupReaction.add_error_not_same_repo", "add_error_reaction_not_same_repo")
-		return
-	}
+	//
+	// // check same repo
+	// if issue.RepoID != child.RepoID {
+	// 	ctx.Error(http.StatusBadRequest, "repo.issue.groupReaction.add_error_not_same_repo", "add_error_reaction_not_same_repo")
+	// 	return
+	// }
 
 	// check same issue
 	if issue.Index == child.Index {
@@ -134,9 +134,9 @@ func RemoveGroupReaction(ctx *context.APIContext, form api.RemoveIssueGroupReact
 	}
 
 	// child issue
-	child, err :=  models.GetIssueByID(childID)
+	child, err :=  models.GetIssueByIndex(ctx.Repo.Repository.ID, childID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetIssueByID", err)
+		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
 		return
 	}
 
