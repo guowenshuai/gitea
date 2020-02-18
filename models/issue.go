@@ -416,6 +416,22 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 			apiIssue.BlockingDependencies = append(apiIssue.BlockingDependencies, iss[i].ID)
 		}
 	}
+
+	if iss, err := issue.GroupReactionChildren(); err != nil {
+		log.Error("apiFormat.GroupReactionChildren %+v", err)
+	} else {
+		for i := range iss {
+			apiIssue.GroupChildren = append(apiIssue.GroupChildren, iss[i].ID)
+		}
+	}
+
+	if iss, err := issue.GroupReactionParents(); err != nil {
+		log.Error("apiFormat.GroupReactionParents %+v", err)
+	} else {
+		for i := range iss {
+			apiIssue.GroupParents = append(apiIssue.GroupParents, iss[i].ID)
+		}
+	}
 	return apiIssue
 }
 

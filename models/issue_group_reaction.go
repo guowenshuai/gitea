@@ -87,3 +87,34 @@ func RemoveIssueGroupReaction(user *User, issue *Issue, child *Issue) (err error
 	// }
 	return sess.Commit()
 }
+
+func (issue *Issue) GroupReactionChildren() ([]*Issue, error) {
+	return issue.getGroupReactionChildren(x)
+}
+
+func (issue *Issue) GroupReactionParents() ([]*Issue, error) {
+	return issue.getGroupReactionParents(x)
+}
+
+
+// Get children issues
+func (issue *Issue) getGroupReactionChildren(e Engine) (issues []*Issue, err error) {
+	return issues, e.
+		Table("issue_group_reaction").
+		Select("issue.*").
+		Join("INNER", "issue", "issue.id = issue_group_reaction.child_id").
+		Where("issue_id = ?", issue.ID).
+		Find(&issues)
+}
+
+// Get parents issues
+func (issue *Issue) getGroupReactionParents(e Engine) (issues []*Issue, err error) {
+	return issues, e.
+		Table("issue_group_reaction").
+		Select("issue.*").
+		Join("INNER", "issue", "issue.id = issue_group_reaction.issue_id").
+		Where("child_id = ?", issue.ID).
+		Find(&issues)
+}
+
+

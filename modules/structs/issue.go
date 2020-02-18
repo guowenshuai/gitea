@@ -58,6 +58,9 @@ type Issue struct {
 
 	BlockedByDependencies []int64 `json:"blocked_by_dependencies"`
 	BlockingDependencies  []int64 `json:"blocking_dependencies"`
+
+	GroupParents  []int64 `json:"group_parents"`
+	GroupChildren []int64 `json:"group_children"`
 }
 
 // ListIssueOption list issue options
