@@ -54,7 +54,9 @@ type Issue struct {
 	// swagger:strfmt date-time
 	Deadline *time.Time `json:"due_date"`
 
-	PullRequest *PullRequestMeta `json:"pull_request"`
+	// PullRequest *PullRequestMeta `json:"pull_request"`
+
+	PullRequest *PullRequest `json:"pull_request"`
 
 	BlockedByDependencies []int64 `json:"blocked_by_dependencies"`
 	BlockingDependencies  []int64 `json:"blocking_dependencies"`

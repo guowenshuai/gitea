@@ -391,12 +391,33 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 	}
 	if issue.IsPull {
 		issue.loadPullRequest(e)
-		apiIssue.PullRequest = &api.PullRequestMeta{
-			HasMerged: issue.PullRequest.HasMerged,
+		// load all pr info
+		// apiIssue.PullRequest = &PullRequest{
+		// 	ID:              issue.PullRequest.ID,
+		// 	Status:          issue.PullRequest.Status,
+		// 	Index:           issue.PullRequest.Index,
+		// 	HeadBranch:      issue.PullRequest.HeadBranch,
+		// 	BaseBranch:      issue.PullRequest.BaseBranch,
+		// 	HasMerged:       issue.PullRequest.HasMerged,
+		// }
+
+		apiIssue.PullRequest = &api.PullRequest{
+			ID:             issue.PullRequest.ID,
+			Index:          issue.PullRequest.Index,
+			State:          issue.State(),
+			HasMerged:      issue.PullRequest.HasMerged,
 		}
 		if issue.PullRequest.HasMerged {
 			apiIssue.PullRequest.Merged = issue.PullRequest.MergedUnix.AsTimePtr()
+			apiIssue.PullRequest.MergedCommitID = &issue.PullRequest.MergedCommitID
 		}
+
+		// apiIssue.PullRequest = &api.PullRequestMeta{
+		// 	HasMerged: issue.PullRequest.HasMerged,
+		// }
+		// if issue.PullRequest.HasMerged {
+		// 	apiIssue.PullRequest.Merged = issue.PullRequest.MergedUnix.AsTimePtr()
+		// }
 	}
 	if issue.DeadlineUnix != 0 {
 		apiIssue.Deadline = issue.DeadlineUnix.AsTimePtr()
