@@ -3408,6 +3408,57 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/issues/{index}/dispatch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "Create a dispatch to a issue",
+        "operationId": "issueCreateDispatch",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateIssueDispatchOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/issues/{index}/groupReaction": {
       "post": {
         "consumes": [
@@ -7594,6 +7645,27 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "CreateIssueDispatchOption": {
+      "description": "CreateIssueDispatchOption options for create a dependency",
+      "type": "object",
+      "required": [
+        "repository"
+      ],
+      "properties": {
+        "base": {
+          "description": "base branch, default is master",
+          "type": "string",
+          "x-go-name": "Base"
+        },
+        "repository": {
+          "description": "repository id which will dispatched",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Repository"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "CreateIssueGroupReactionOption": {
       "description": "CreateIssueGroupReactionOption options for create a group reaction",
       "type": "object",
@@ -9014,6 +9086,22 @@
           "format": "date-time",
           "x-go-name": "Deadline"
         },
+        "group_children": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "GroupChildren"
+        },
+        "group_parents": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "GroupParents"
+        },
         "id": {
           "type": "integer",
           "format": "int64",
@@ -9035,7 +9123,7 @@
           "x-go-name": "Index"
         },
         "pull_request": {
-          "$ref": "#/definitions/PullRequestMeta"
+          "$ref": "#/definitions/PullRequest"
         },
         "state": {
           "$ref": "#/definitions/StateType"
@@ -9624,22 +9712,6 @@
         },
         "user": {
           "$ref": "#/definitions/User"
-        }
-      },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
-    },
-    "PullRequestMeta": {
-      "description": "PullRequestMeta PR info if an issue is a PR",
-      "type": "object",
-      "properties": {
-        "merged": {
-          "type": "boolean",
-          "x-go-name": "HasMerged"
-        },
-        "merged_at": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "Merged"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -10772,7 +10844,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/RemoveIssueGroupReactionOption"
+        "$ref": "#/definitions/CreateIssueDispatchOption"
       }
     },
     "redirect": {
