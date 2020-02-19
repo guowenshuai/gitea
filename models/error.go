@@ -1548,7 +1548,9 @@ func (err ErrUnknownDependencyType) Error() string {
 // custom error by raging
 //
 
-// group reaction
+/************************
+ * group reaction
+ **************************/
 
 // ErrGroupReactionExists already exist
 type ErrGroupReactionExists struct {
@@ -1596,6 +1598,44 @@ func IsErrCircularGroupReaction(err error) bool {
 
 func (err ErrCircularGroupReaction) Error() string {
 	return fmt.Sprintf("issue group reaction Circular [issue id: %d, child id: %d]", err.IssueID, err.ChildID)
+}
+
+/************************
+ * dispatch
+ **************************/
+
+// ErrGroupReactionExists already exist
+type ErrDispatchExists struct {
+	IssueID       int64
+	DispatchID    int64
+	PullRequestID int64
+}
+
+// IsErrDispatchExists checks if an error is a ErrDispatchExists.
+func IsErrDispatchExists(err error) bool {
+	_, ok := err.(ErrDispatchExists)
+	return ok
+}
+
+func (err ErrDispatchExists) Error() string {
+	return fmt.Sprintf("issue dispatch does already exist [issue id: %d, dispatch id: %d, pullRequest id: %d]", err.IssueID, err.DispatchID, err.PullRequestID)
+}
+
+// ErrDispatchNotExists not exist
+type ErrDispatchNotExists struct {
+	IssueID       int64
+	DispatchID    int64
+	PullRequestID int64
+}
+
+// IsErrDispatchNotExists checks if an error is a ErrDispatchExists.
+func IsErrDispatchNotExists(err error) bool {
+	_, ok := err.(ErrDispatchNotExists)
+	return ok
+}
+
+func (err ErrDispatchNotExists) Error() string {
+	return fmt.Sprintf("issue dispatch does not exist [issue id: %d, dispatch id: %d, pullRequest id: %d]", err.IssueID, err.DispatchID, err.PullRequestID)
 }
 
 //  __________            .__

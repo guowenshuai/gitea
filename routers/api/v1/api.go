@@ -676,6 +676,10 @@ func RegisterRoutes(m *macaron.Macaron) {
 								Delete(bind(api.RemoveIssueDependencyOption{}), repo.RemoveDependency)
 						})
 
+						m.Group("/dispatch", func() {
+							m.Combo("").Post(reqToken(), mustNotBeArchived, bind(api.CreateIssueDispatchOption{}), repo.CreateDispatch)
+						})
+
 						m.Group("/groupReaction", func() {
 							m.Combo("").
 								Post(bind(api.CreateIssueGroupReactionOption{}), repo.AddGroupReaction).

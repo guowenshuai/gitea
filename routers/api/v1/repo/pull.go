@@ -5,6 +5,7 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -734,4 +735,137 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	}
 
 	return headUser, headRepo, headGitRepo, compareInfo, baseBranch, headBranch
+}
+
+
+func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption) (*models.PullRequest, error){
+	var (
+		repo        = ctx.Repo.Repository
+		labelIDs    []int64
+		assigneeID  int64
+		milestoneID int64
+	)
+
+	// Get repo/branch information
+	headUser, headRepo, headGitRepo, compareInfo, baseBranch, headBranch := parseCompareInfo(ctx, form)
+	if ctx.Written() {
+		return nil, errors.New("ctx.Written")
+	}
+	defer headGitRepo.Close()
+
+	// Check if another PR exists with the same targets
+	existingPr, err := models.GetUnmergedPullRequest(headRepo.ID, ctx.Repo.Repository.ID, headBranch, baseBranch)
+	if err != nil {
+		if !models.IsErrPullRequestNotExist(err) {
+			log.Error("GetUnmergedPullRequest error: %s", err)
+			return nil, err
+		}
+	} else {
+		err = models.ErrPullRequestAlreadyExists{
+			ID:         existingPr.ID,
+			IssueID:    existingPr.Index,
+			HeadRepoID: existingPr.HeadRepoID,
+			BaseRepoID: existingPr.BaseRepoID,
+			HeadBranch: existingPr.HeadBranch,
+			BaseBranch: existingPr.BaseBranch,
+		}
+		log.Error("GetUnmergedPullRequest error: %s", err)
+		return nil, err
+	}
+
+	if len(form.Labels) > 0 {
+		labels, err := models.GetLabelsInRepoByIDs(ctx.Repo.Repository.ID, form.Labels)
+		if err != nil {
+			log.Error("GetLabelsInRepoByIDs error: %s", err)
+			return nil, err
+		}
+
+		labelIDs = make([]int64, len(labels))
+		for i := range labels {
+			labelIDs[i] = labels[i].ID
+		}
+	}
+
+	if form.Milestone > 0 {
+		milestone, err := models.GetMilestoneByRepoID(ctx.Repo.Repository.ID, milestoneID)
+		if err != nil {
+			if models.IsErrMilestoneNotExist(err) {
+				log.Error("GetMilestoneByRepoID error: not found")
+			} else {
+				log.Error("GetMilestoneByRepoID error: %s", err)
+			}
+			return nil, err
+		}
+
+		milestoneID = milestone.ID
+	}
+
+	patch, err := headGitRepo.GetPatch(compareInfo.MergeBase, headBranch)
+	if err != nil {
+		log.Error("GetPatch error: %s", err)
+		return nil, err
+	}
+
+	var deadlineUnix util.TimeStamp
+	if form.Deadline != nil {
+		deadlineUnix = util.TimeStamp(form.Deadline.Unix())
+	}
+
+	maxIndex, err := models.GetMaxIndexOfIssue(repo.ID)
+	if err != nil {
+		log.Error("GetMaxIndexOfIssue error: %s", err)
+		return nil, err
+	}
+
+	prIssue := &models.Issue{
+		RepoID:       repo.ID,
+		Index:        maxIndex + 1,
+		Title:        form.Title,
+		PosterID:     ctx.User.ID,
+		Poster:       ctx.User,
+		MilestoneID:  milestoneID,
+		AssigneeID:   assigneeID,
+		IsPull:       true,
+		Content:      form.Body,
+		DeadlineUnix: deadlineUnix,
+	}
+	pr := &models.PullRequest{
+		HeadRepoID:   headRepo.ID,
+		BaseRepoID:   repo.ID,
+		HeadUserName: headUser.Name,
+		HeadBranch:   headBranch,
+		BaseBranch:   baseBranch,
+		HeadRepo:     headRepo,
+		BaseRepo:     repo,
+		MergeBase:    compareInfo.MergeBase,
+		Type:         models.PullRequestGitea,
+	}
+
+	// Get all assignee IDs
+	assigneeIDs, err := models.MakeIDsFromAPIAssigneesToAdd(form.Assignee, form.Assignees)
+	if err != nil {
+		if models.IsErrUserNotExist(err) {
+			log.Error("Assignee does not exist: [name: %s]", err)
+		} else {
+			log.Error("AddAssigneeByName: %s", err)
+		}
+		return nil, err
+	}
+
+	if err := models.NewPullRequest(repo, prIssue, labelIDs, []string{}, pr, patch, assigneeIDs); err != nil {
+		if models.IsErrUserDoesNotHaveAccessToRepo(err) {
+			log.Error("UserDoesNotHaveAccessToRepo: %s", err)
+			return nil, err
+		}
+		log.Error("NewPullRequest: %s", err)
+		return nil, err
+	} else if err := pr.PushToBaseRepo(); err != nil {
+		log.Error("PushToBaseRepo: %s", err)
+		return nil, err
+	}
+
+	notification.NotifyNewPullRequest(pr)
+	log.Trace("Pull request created: %d/%d", repo.ID, prIssue.ID)
+	// ctx.JSON(201, pr.APIFormat())
+	return pr, nil
 }

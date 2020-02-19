@@ -135,4 +135,7 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	RemoveIssueGroupReactionOption api.RemoveIssueGroupReactionOption
+
+	// in:body
+	CreateIssueDispatchOption api.CreateIssueDispatchOption
 }
