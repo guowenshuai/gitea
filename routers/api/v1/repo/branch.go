@@ -6,13 +6,15 @@
 package repo
 
 import (
+	"fmt"
 	"net/http"
 
+	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/routers/api/v1/convert"
-
+	"code.gitea.io/gitea/modules/log"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/routers/api/v1/convert"
 )
 
 // GetBranch get a branch of a repository
@@ -162,4 +164,114 @@ func CreateBranch(ctx *context.APIContext, form api.CreateBranchOption) {
 	}
 
 	ctx.JSON(200, convert.ToBranch(ctx.Repo.Repository, branch, c))
+}
+
+func DeleteBranch(ctx *context.APIContext) {
+	// swagger:operation DELETE /repos/{owner}/{repo}/branch/{name} repository repoDeleteBranch
+	// ---
+	// summary: Delete a branch
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the repo
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo
+	//   type: string
+	//   required: true
+	// - name: name
+	//   in: path
+	//   description: name of branch
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/Branch"
+
+	fmt.Println("11111111")
+	branchName := ctx.ParamsEscape(":name")
+	isProtected, err := ctx.Repo.Repository.IsProtectedBranch(branchName, ctx.User)
+	if err != nil {
+		log.Error("DeleteBranch: %v", err)
+		ctx.Error(http.StatusBadRequest, "repo.branch.deletion_failed", err)
+		return
+	}
+	fmt.Println("22222222")
+
+	if isProtected {
+		ctx.Error(http.StatusBadRequest, "repo.branch.protected_deletion_failed", err)
+		return
+	}
+	fmt.Println("3333")
+
+
+	// if !ctx.Repo.GitRepo.IsBranchExist(branchName) || branchName == ctx.Repo.Repository.DefaultBranch {
+	// 	ctx.Error(http.StatusBadRequest, "repo.branch.deletion_failed", err)
+	// 	fmt.Printf("3333 error %+v", err.Error())
+	// 	return
+	// }
+
+	userName := ctx.Params(":username")
+	repoName := ctx.Params(":reponame")
+
+	fmt.Printf("4444 %s/%s", userName, repoName)
+
+
+	gitRepo, err := git.OpenRepository(models.RepoPath(userName, repoName))
+	fmt.Println("44440")
+
+
+	if err != nil {
+		ctx.ServerError("RepoAssignment Invalid repo "+models.RepoPath(userName, repoName), err)
+		return
+	}
+	fmt.Println("44441")
+
+	ctx.Repo.GitRepo = gitRepo
+	// We opened it, we should close it
+	defer func() {
+		// If it's been set to nil then assume someone else has closed it.
+		if ctx.Repo.GitRepo != nil {
+			ctx.Repo.GitRepo.Close()
+		}
+	}()
+	if ctx.Repo.GitRepo == nil {
+		ctx.Error(500, "nil gitrepo", "nil git repo")
+		return
+	}
+	fmt.Println("44442")
+
+
+	_, err = ctx.Repo.GitRepo.GetBranchCommit(branchName)
+	if err != nil {
+		log.Error("GetBranchCommit: %v", err)
+		return
+	}
+
+	if err := ctx.Repo.GitRepo.DeleteBranch(branchName, git.DeleteBranchOptions{
+		Force: true,
+	}); err != nil {
+		log.Error("DeleteBranch: %v", err)
+		return
+	}
+
+	// if err := ctx.Repo.GitRepo.DeleteBranch(branchName, git.DeleteBranchOptions{
+	// 	Force: true,
+	// }); err != nil {
+	// 	log.Error("DeleteBranch: %v", err)
+	// 	ctx.Error(http.StatusBadRequest, "DeleteBranch", err)
+	// 	return
+	// }
+
+	fmt.Println("5555")
+
+	ctx.JSON(200, struct {
+		Message string
+	}{"Success"})
+
+	fmt.Println("666666")
+
 }

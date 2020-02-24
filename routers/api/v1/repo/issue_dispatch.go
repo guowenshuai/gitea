@@ -3,12 +3,14 @@ package repo
 import (
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/git"
 	api "code.gitea.io/gitea/modules/structs"
+	"github.com/lunny/log"
 )
 
 // CreateDispatch dispatch a issue to a repository
@@ -58,7 +60,7 @@ func CreateDispatch(ctx *context.APIContext, form api.CreateIssueDispatchOption)
 	}
 
 	// 检查仓库是否存在 form.base 这个分支
-	baseBranch, err := dispatchRepo.GetBranch(ctx.Repo.BranchName)
+	baseBranch, err := dispatchRepo.GetBranch(form.Base)
 	if err != nil {
 		if git.IsErrBranchNotExist(err) {
 			ctx.NotFound(err)
@@ -77,19 +79,32 @@ func CreateDispatch(ctx *context.APIContext, form api.CreateIssueDispatchOption)
 	}
 	newBranch := generateBranchName(issue)
 
-	if !ctx.Repo.CanCreateBranch() {
+	ctx2 := *ctx
+	ctx2.Repo.Repository = dispatchRepo
+
+	if !ctx2.Repo.CanCreateBranch() {
 		ctx.NotFound("CreateBranch", nil)
 		return
 	}
 
-	err = ctx.Repo.Repository.CreateNewBranch(ctx.User, baseBranch.Name, newBranch)
+	err = ctx2.Repo.Repository.CreateNewBranch(ctx.User, baseBranch.Name, newBranch)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "CreateNewBranch", err)
 		return
 	}
 
 	// 基于form.base和新分支，创建一个pr
-	pr, err := createPullRequest(ctx, api.CreatePullRequestOption{})
+	pr, err := createPullRequest(&ctx2, api.CreatePullRequestOption{
+		Head:      newBranch,
+		Base:      baseBranch.Name,
+		Title:     issue.Title,
+		Body:      issue.Title,
+		Assignee:  "",
+		Assignees: nil,
+		Milestone: 0,
+		Labels:    nil,
+		Deadline:  nil,
+	})
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "createPullRequest", err)
 		return
@@ -107,12 +122,13 @@ func CreateDispatch(ctx *context.APIContext, form api.CreateIssueDispatchOption)
 }
 
 func generateBranchName(issue *models.Issue) string {
-	branch := string(issue.Index) + "-"
+	branch := strconv.FormatInt(issue.Index,10) + "-"
 	if len(issue.Title) > 0 {
 		reg := regexp.MustCompile(`\w+`)
 		s := reg.FindAllString(issue.Title, 2)
 		branch = branch + strings.Join(s, "_")
 	}
+	log.Infof("generateBranchName [%s]\n", branch)
 	return branch
 }
 
