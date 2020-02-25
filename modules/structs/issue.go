@@ -63,6 +63,8 @@ type Issue struct {
 
 	GroupParents  []int64 `json:"group_parents"`
 	GroupChildren []int64 `json:"group_children"`
+
+	Dispatch *Dispatch `json:"dispatch"`
 }
 
 // ListIssueOption list issue options

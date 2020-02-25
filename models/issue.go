@@ -453,6 +453,25 @@ func (issue *Issue) apiFormat(e Engine) *api.Issue {
 			apiIssue.GroupParents = append(apiIssue.GroupParents, iss[i].Index)
 		}
 	}
+
+	if dispatch, err := issue.GetDispatch(); err != nil {
+		fmt.Printf("e:%+v", err)
+		log.Error("apiFormat %+v", err)
+	} else {
+		fmt.Printf("ne:%+v", dispatch)
+		apiIssue.Dispatch = &api.Dispatch{
+			Repo:  &api.Repository{
+				ID:    dispatch.Repository.ID,
+				Name:  dispatch.Repository.Name,
+			},
+			Pr: &api.PullRequest{
+				ID:  dispatch.PullRequest.ID,
+				Index: dispatch.PullRequest.Index,
+			},
+			Issue: dispatch.Issue.APIFormat(),
+		}
+	}
+
 	return apiIssue
 }
 

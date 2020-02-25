@@ -657,7 +657,9 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	log.Info("Base branch: %s", baseBranch)
 	log.Info("Repo path: %s", ctx.Repo.GitRepo.Path)
 	// Check if base branch is valid.
+
 	if !ctx.Repo.GitRepo.IsBranchExist(baseBranch) {
+
 		ctx.NotFound("IsBranchExist")
 		return nil, nil, nil, nil, "", ""
 	}
@@ -737,8 +739,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	return headUser, headRepo, headGitRepo, compareInfo, baseBranch, headBranch
 }
 
-
-func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption) (*models.PullRequest, error){
+func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption) (*models.PullRequest, error) {
 	var (
 		repo        = ctx.Repo.Repository
 		labelIDs    []int64
@@ -749,18 +750,22 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 	// Get repo/branch information
 	headUser, headRepo, headGitRepo, compareInfo, baseBranch, headBranch := parseCompareInfo(ctx, form)
 	if ctx.Written() {
+
 		return nil, errors.New("ctx.Written")
 	}
+
 	defer headGitRepo.Close()
 
 	// Check if another PR exists with the same targets
 	existingPr, err := models.GetUnmergedPullRequest(headRepo.ID, ctx.Repo.Repository.ID, headBranch, baseBranch)
 	if err != nil {
+
 		if !models.IsErrPullRequestNotExist(err) {
 			log.Error("GetUnmergedPullRequest error: %s", err)
 			return nil, err
 		}
 	} else {
+
 		err = models.ErrPullRequestAlreadyExists{
 			ID:         existingPr.ID,
 			IssueID:    existingPr.Index,
@@ -769,11 +774,17 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 			HeadBranch: existingPr.HeadBranch,
 			BaseBranch: existingPr.BaseBranch,
 		}
-		log.Error("GetUnmergedPullRequest error: %s", err)
-		return nil, err
+		log.Info("GetUnmergedPullRequest exists: %s", err)
+
+		if err := existingPr.LoadIssue(); err != nil {
+
+			return nil, err
+		}
+		return existingPr, nil
 	}
 
 	if len(form.Labels) > 0 {
+
 		labels, err := models.GetLabelsInRepoByIDs(ctx.Repo.Repository.ID, form.Labels)
 		if err != nil {
 			log.Error("GetLabelsInRepoByIDs error: %s", err)
@@ -787,6 +798,7 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 	}
 
 	if form.Milestone > 0 {
+
 		milestone, err := models.GetMilestoneByRepoID(ctx.Repo.Repository.ID, milestoneID)
 		if err != nil {
 			if models.IsErrMilestoneNotExist(err) {
@@ -802,6 +814,7 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 
 	patch, err := headGitRepo.GetPatch(compareInfo.MergeBase, headBranch)
 	if err != nil {
+
 		log.Error("GetPatch error: %s", err)
 		return nil, err
 	}
@@ -843,6 +856,7 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 
 	// Get all assignee IDs
 	assigneeIDs, err := models.MakeIDsFromAPIAssigneesToAdd(form.Assignee, form.Assignees)
+
 	if err != nil {
 		if models.IsErrUserNotExist(err) {
 			log.Error("Assignee does not exist: [name: %s]", err)
@@ -853,6 +867,7 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 	}
 
 	if err := models.NewPullRequest(repo, prIssue, labelIDs, []string{}, pr, patch, assigneeIDs); err != nil {
+
 		if models.IsErrUserDoesNotHaveAccessToRepo(err) {
 			log.Error("UserDoesNotHaveAccessToRepo: %s", err)
 			return nil, err
@@ -860,6 +875,7 @@ func createPullRequest(ctx *context.APIContext, form api.CreatePullRequestOption
 		log.Error("NewPullRequest: %s", err)
 		return nil, err
 	} else if err := pr.PushToBaseRepo(); err != nil {
+
 		log.Error("PushToBaseRepo: %s", err)
 		return nil, err
 	}

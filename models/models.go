@@ -123,6 +123,7 @@ func init() {
 		new(RepoIndexerStatus),
 		new(IssueDependency),
 		new(IssueGroupReaction),
+		new(IssueDispatch),
 		new(LFSLock),
 		new(Reaction),
 		new(IssueAssignees),

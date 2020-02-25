@@ -635,7 +635,7 @@ func RegisterRoutes(m *macaron.Macaron) {
 				m.Group("/branch", func() {
 					m.Combo("").Post(bind(api.CreateBranchOption{}), repo.CreateBranch)
 					m.Combo("/:name").Delete(repo.DeleteBranch)
-				})
+				}, context.ReferencesGitRepo(false))
 
 				// m.Combo("/branch").Post(bind(api.CreateBranchOption{}), repo.CreateBranch).
 				// 	Delete(repo.DeleteBranch)
@@ -684,7 +684,7 @@ func RegisterRoutes(m *macaron.Macaron) {
 
 						m.Group("/dispatch", func() {
 							m.Combo("").Post(reqToken(), mustNotBeArchived, bind(api.CreateIssueDispatchOption{}), repo.CreateDispatch)
-						})
+						}, context.ReferencesGitRepo(false))
 
 						m.Group("/groupReaction", func() {
 							m.Combo("").
