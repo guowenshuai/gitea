@@ -66,7 +66,7 @@ func issueDisPatchExists(e Engine, issueID, dispatchID, pullRequestID int64) (bo
 }
 
 // RemoveIssueDispatch removes a group reaction from an issue
-func RemoveIssueDispatch(user *User, issue, dispatch *Issue, pr *PullRequest) (err error) {
+func RemoveIssueDispatch(user *User, dispatch *IssueDispatch) (err error) {
 	sess := x.NewSession()
 	defer sess.Close()
 	if err = sess.Begin(); err != nil {
@@ -74,10 +74,8 @@ func RemoveIssueDispatch(user *User, issue, dispatch *Issue, pr *PullRequest) (e
 	}
 
 	issueDispatchDelete := IssueDispatch{
-		UserID:        user.ID,
-		IssueID:       issue.ID,
-		DispatchedID:  dispatch.ID,
-		PullRequestID: pr.ID,
+		IssueID:      dispatch.IssueID,
+		DispatchedID: dispatch.DispatchedID,
 	}
 
 	affected, err := sess.Delete(&issueDispatchDelete)
@@ -88,9 +86,9 @@ func RemoveIssueDispatch(user *User, issue, dispatch *Issue, pr *PullRequest) (e
 	// If we deleted nothing, the dependency did not exist
 	if affected <= 0 {
 		return ErrDispatchNotExists{
-			IssueID:       issue.ID,
-			DispatchID:    dispatch.ID,
-			PullRequestID: pr.ID,
+			IssueID:       dispatch.IssueID,
+			DispatchID:    dispatch.DispatchedID,
+			PullRequestID: dispatch.RepoID,
 		}
 	}
 
@@ -99,7 +97,7 @@ func RemoveIssueDispatch(user *User, issue, dispatch *Issue, pr *PullRequest) (e
 
 // GetDispatch return dispatched issues
 func (issue *Issue) GetDispatch() (*Dispatch, error) {
-	dispatch, err := issue.getDispatch1(x)
+	dispatch, err := GetDispatchByIssueID(issue.ID)
 	if err != nil {
 		log.Error("GetDispatch.getDispatch error: %+v", err)
 		return nil, err
@@ -139,10 +137,7 @@ func (issue *Issue) GetDispatch() (*Dispatch, error) {
 	// return issue.getDispatch(x)
 }
 
-func (issue *Issue) getDispatch(e Engine) (dispatch []*IssueDispatch, err error) {
-	return dispatch, e.Where("issue_id = ?", issue.ID).Find(&dispatch)
-}
-func (issue *Issue) getDispatch1(e Engine) (dispatch *IssueDispatch, err error) {
+func (issue *Issue) getDispatch(e Engine) (dispatch *IssueDispatch, err error) {
 	d := &IssueDispatch{
 		IssueID: issue.ID,
 	}
@@ -155,5 +150,19 @@ func (issue *Issue) getDispatch1(e Engine) (dispatch *IssueDispatch, err error) 
 		}
 	}
 	return d, nil
+}
 
+func GetDispatchByIssueID(issueID int64) (dispatch *IssueDispatch, err error) {
+	d := &IssueDispatch{
+		IssueID: issueID,
+	}
+	has, err := x.Get(d)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, ErrDispatchNotExists{
+			IssueID: issueID,
+		}
+	}
+	return d, nil
 }

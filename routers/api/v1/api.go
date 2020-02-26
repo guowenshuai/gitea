@@ -683,7 +683,8 @@ func RegisterRoutes(m *macaron.Macaron) {
 						})
 
 						m.Group("/dispatch", func() {
-							m.Combo("").Post(reqToken(), mustNotBeArchived, bind(api.CreateIssueDispatchOption{}), repo.CreateDispatch)
+							m.Combo("").Post(reqToken(), mustNotBeArchived, bind(api.CreateIssueDispatchOption{}), repo.CreateDispatch).
+								Delete(reqToken(), mustNotBeArchived, repo.DeleteDispatch)
 						}, context.ReferencesGitRepo(false))
 
 						m.Group("/groupReaction", func() {

@@ -3496,6 +3496,48 @@
             "$ref": "#/responses/Issue"
           }
         }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "issue"
+        ],
+        "summary": "Delete a dispatched for an issue",
+        "operationId": "issueDeleteDispatch",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "index of the issue",
+            "name": "index",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Issue"
+          }
+        }
       }
     },
     "/repos/{owner}/{repo}/issues/{index}/groupReaction": {
@@ -8222,6 +8264,21 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "Dispatch": {
+      "type": "object",
+      "properties": {
+        "issue": {
+          "$ref": "#/definitions/Issue"
+        },
+        "pr": {
+          "$ref": "#/definitions/PullRequest"
+        },
+        "repo": {
+          "$ref": "#/definitions/Repository"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "EditAttachmentOptions": {
       "description": "EditAttachmentOptions options for editing attachments",
       "type": "object",
@@ -9119,6 +9176,9 @@
           "type": "string",
           "format": "date-time",
           "x-go-name": "Created"
+        },
+        "dispatch": {
+          "$ref": "#/definitions/Dispatch"
         },
         "due_date": {
           "type": "string",

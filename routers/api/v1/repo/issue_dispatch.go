@@ -156,6 +156,56 @@ func CreateDispatch(ctx *context.APIContext, form api.CreateIssueDispatchOption)
 	}
 }
 
+// DeleteDispatch issue's dispatch
+func DeleteDispatch(ctx *context.APIContext) {
+	// swagger:operation Delete /repos/{owner}/{repo}/issues/{index}/dispatch issue issueDeleteDispatch
+	// ---
+	// summary: Delete a dispatched for an issue
+	// consumes:
+	// - application/json
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the repo
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo
+	//   type: string
+	//   required: true
+	// - name: index
+	//   in: path
+	//   description: index of the issue
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "201":
+	//     "$ref": "#/responses/Issue"
+	issueIndex := ctx.ParamsInt64("index")
+	issue, err := models.GetIssueByIndex(ctx.Repo.Repository.ID, issueIndex)
+	if err != nil {
+		ctx.Error(http.StatusNotFound, "GetIssueByIndex", err)
+		return
+	}
+	dispatch, err := models.GetDispatchByIssueID(issue.ID)
+	if err != nil {
+		ctx.Error(http.StatusNotFound, "GetDispatchByIssueID", err)
+		return
+	}
+	if err := models.RemoveIssueDispatch(ctx.User, dispatch); err != nil {
+		ctx.Error(http.StatusInternalServerError, "RemoveIssueDispatch", err)
+		return
+	}
+
+	ctx.JSON(200, map[string]interface{}{
+		"ok": true,
+	})
+}
+
 func generateBranchName(issue *models.Issue) string {
 	branch := strconv.FormatInt(issue.Index, 10) + "-"
 	if len(issue.Title) > 0 {
